@@ -5,7 +5,14 @@ import pyperclip
 import traceback
 from typing import List, Dict, Any
 
-from PyQt5.QtWidgets import QDialog, QHBoxLayout, QVBoxLayout, QPushButton, QApplication
+from PyQt5.QtWidgets import (
+    QDialog,
+    QHBoxLayout,
+    QVBoxLayout,
+    QPushButton,
+    QApplication,
+    QGridLayout,
+)
 from PyQt5.QtCore import Qt, QEvent
 
 from .widgets import VoltageSourceDialog, VoltageConfigDialog, Separator
@@ -24,7 +31,9 @@ class VoltageControlDialog(QDialog):
         self.parameters = parameters
         self.mini = mini
         self.index_keys = {}
-        self.state_parameters = {state: [] for state in ["up_down", "left_right", "none"]}
+        self.state_parameters = {
+            state: [] for state in ["up_down", "left_right", "none"]
+        }
         self.voltage_source_dialogs: Dict[str, VoltageSourceDialog] = {}
         self.initUI()
         rect = QApplication.desktop().screenGeometry()
@@ -39,9 +48,13 @@ class VoltageControlDialog(QDialog):
         self.setLayout(self.layout)
 
         self.config_widget = VoltageConfigDialog(mini=self.mini)
-        self.config_widget.ramp_button.clicked.connect(lambda clicked: self.ramp_voltages())
+        self.config_widget.ramp_button.clicked.connect(
+            lambda clicked: self.ramp_voltages()
+        )
         self.config_widget.ramp_button.clicked.connect(self._clear_focus)
-        self.config_widget.ramp_zero_button.clicked.connect(lambda clicked: self.ramp_voltages(0))
+        self.config_widget.ramp_zero_button.clicked.connect(
+            lambda clicked: self.ramp_voltages(0)
+        )
         self.config_widget.ramp_zero_button.clicked.connect(self._clear_focus)
 
         self.config_widget.copy_button = QPushButton("Copy from clipboard")
@@ -50,27 +63,38 @@ class VoltageControlDialog(QDialog):
         self.config_widget.layout.addWidget(self.config_widget.copy_button)
 
         self.layout.addWidget(self.config_widget)
+        self.layout.addWidget(Separator())
+        self.grid_layout = QGridLayout()
+        self.layout.addLayout(self.grid_layout)
 
+        n = len(self.parameters)
+        c = int((n * ((1 + 5**0.5) / 2)) ** 0.5)  # Golden ratio
         for k, parameter in enumerate(self.parameters):
             idx = k + 1
-            self.layout.addWidget(Separator())
-            voltage_source_dialog = VoltageSourceDialog(parameter, idx=idx, mini=self.mini)
-            
+            # self.layout.addWidget(Separator())
+            voltage_source_dialog = VoltageSourceDialog(
+                parameter, idx=idx, mini=self.mini
+            )
+
             # Wrap the VoltageSourceDialog in a QHBoxLayout to make it expand properly
             dialog_layout = QHBoxLayout()
             dialog_layout.addWidget(voltage_source_dialog)
             dialog_layout.setContentsMargins(0, 0, 0, 0)
-            
-            self.layout.addLayout(dialog_layout)
-            
+
+            self.grid_layout.addLayout(dialog_layout, k // c, k % c)
+
             if idx < 10:
                 Qt_index_key = getattr(Qt, f"Key_{idx}")
                 self.index_keys[Qt_index_key] = voltage_source_dialog
             self.voltage_source_dialogs[parameter.name] = voltage_source_dialog
 
             voltage_source_dialog.state_change.connect(self.update_parameters)
-            self.config_widget.ramp_button.clicked.connect(voltage_source_dialog._reset_val_textbox)
-            self.config_widget.ramp_zero_button.clicked.connect(voltage_source_dialog._reset_val_textbox)
+            self.config_widget.ramp_button.clicked.connect(
+                voltage_source_dialog._reset_val_textbox
+            )
+            self.config_widget.ramp_zero_button.clicked.connect(
+                voltage_source_dialog._reset_val_textbox
+            )
 
     def keyPressEvent(self, event):
         try:
@@ -82,16 +106,27 @@ class VoltageControlDialog(QDialog):
                 self._clear_focus()
             elif event.key() == Qt.Key_Up:
                 # Increase voltage for blue (up_down) dialogs
-                self.increase_voltages(self.state_parameters["up_down"], self.config_widget.step["up_down"])
+                self.increase_voltages(
+                    self.state_parameters["up_down"], self.config_widget.step["up_down"]
+                )
             elif event.key() == Qt.Key_Down:
                 # Decrease voltage for blue (up_down) dialogs
-                self.increase_voltages(self.state_parameters["up_down"], -self.config_widget.step["up_down"])
+                self.increase_voltages(
+                    self.state_parameters["up_down"],
+                    -self.config_widget.step["up_down"],
+                )
             elif event.key() == Qt.Key_Right:
                 # Increase voltage for green (left_right) dialogs
-                self.increase_voltages(self.state_parameters["left_right"], self.config_widget.step["left_right"])
+                self.increase_voltages(
+                    self.state_parameters["left_right"],
+                    self.config_widget.step["left_right"],
+                )
             elif event.key() == Qt.Key_Left:
                 # Decrease voltage for green (left_right) dialogs
-                self.increase_voltages(self.state_parameters["left_right"], -self.config_widget.step["left_right"])
+                self.increase_voltages(
+                    self.state_parameters["left_right"],
+                    -self.config_widget.step["left_right"],
+                )
             elif event.key() == Qt.Key_W:
                 self.config_widget.decrease_step("up_down")
             elif event.key() == Qt.Key_S:
@@ -139,7 +174,9 @@ class VoltageControlDialog(QDialog):
         else:
             for voltage_source_dialog in self.voltage_source_dialogs.values():
                 if voltage_source_dialog.modified_val:
-                    voltage_source_dialog.set_voltage(voltage_source_dialog.val_textbox.text())
+                    voltage_source_dialog.set_voltage(
+                        voltage_source_dialog.val_textbox.text()
+                    )
 
     def changeEvent(self, event):
         # Correctly determines it is activated, but cannot clear focus
