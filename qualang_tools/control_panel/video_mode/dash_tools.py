@@ -77,16 +77,16 @@ def xarray_to_plotly(da: xr.DataArray):
     yaxis_label = f"{y_label} ({y_unit})" if y_unit else y_label
     zaxis_label = f"{z_label} ({z_unit})" if z_unit else z_label
 
-    if da.shape[0] == 1:
-        fig = px.line(
-            x=y_coord.values,
-            y=da.values,
-            labels={y_label: yaxis_label, "value": zaxis_label},
-        )
-    elif da.shape[1] == 1:
+    if da.values.shape[0] == 1:
         fig = px.line(
             x=x_coord.values,
-            y=da.values,
+            y=da.values.flatten(),
+            labels={y_label: yaxis_label, "value": zaxis_label},
+        )
+    elif da.values.shape[1] == 1:
+        fig = px.line(
+            x=y_coord.values,
+            y=da.values.flatten(),
             labels={x_label: xaxis_label, "value": zaxis_label},
         )
     else:
