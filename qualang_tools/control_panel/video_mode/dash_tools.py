@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Literal, Optional
 
 from dash import html
 import plotly.graph_objects as go
+import plotly.express as px
 import xarray as xr
 import dash_bootstrap_components as dbc
 
@@ -76,15 +77,29 @@ def xarray_to_plotly(da: xr.DataArray):
     yaxis_label = f"{y_label} ({y_unit})" if y_unit else y_label
     zaxis_label = f"{z_label} ({z_unit})" if z_unit else z_label
 
-    fig = go.Figure(
-        go.Heatmap(
-            z=da.values,
-            x=x_coord.values,
-            y=y_coord.values,
-            colorscale="plasma",
-            colorbar=dict(title=zaxis_label),
+    if da.shape[0] == 1:
+        fig = px.line(
+            x=y_coord.values,
+            y=da.values,
+            labels={y_label: yaxis_label, "value": zaxis_label},
         )
-    )
+    elif da.shape[1] == 1:
+        fig = px.line(
+            x=x_coord.values,
+            y=da.values,
+            labels={x_label: xaxis_label, "value": zaxis_label},
+        )
+    else:
+        fig = go.Figure(
+            go.Heatmap(
+                z=da.values,
+                x=x_coord.values,
+                y=y_coord.values,
+                colorscale="plasma",
+                colorbar=dict(title=zaxis_label),
+            )
+        )
+
     fig.update_layout(xaxis_title=xaxis_label, yaxis_title=yaxis_label)
     return fig
 

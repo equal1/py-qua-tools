@@ -132,7 +132,9 @@ class VoltageSourceDialog(QFrame):
         self.val_textbox = QLineEdit(f"{self.parameter.get_latest():.5g}")
         self.val_textbox.setAlignment(Qt.AlignCenter)
         self.val_textbox.setFont(QFont(text_font, font_size))
-        self.val_textbox.returnPressed.connect(lambda: self.set_voltage(self.val_textbox.text()))
+        self.val_textbox.returnPressed.connect(
+            lambda: self.set_voltage(self.val_textbox.text())
+        )
         val_hbox.addWidget(self.val_textbox)
 
         val_units_label = QLabel("V")
@@ -157,7 +159,7 @@ class VoltageSourceDialog(QFrame):
             for column_idx, scale in enumerate([100, 10, 1]):
                 for row_idx, sign in enumerate([1, -1]):
                     val = sign * scale
-                    button = QPushButton(f"{['-','+'][sign==1]}{scale} mV")
+                    button = QPushButton(f"{['-', '+'][sign == 1]}{scale} mV")
                     self.val_grid.addWidget(button, row_idx, column_idx + 1)
                     width = button.fontMetrics().boundingRect(f"+100 mV").width() + 7
                     button.setMaximumWidth(width)
@@ -194,7 +196,9 @@ class VoltageSourceDialog(QFrame):
         if self.modified_val:
             self.val_textbox.setStyleSheet("color: rgb(255, 0, 0);")
             if self.current_val_label.text() == "":
-                self.current_val_label.setText(f"Current val: {self.parameter.get_latest()}")
+                self.current_val_label.setText(
+                    f"Current val: {self.parameter.get_latest()}"
+                )
         else:
             pass
             # self._reset_val_textbox()
@@ -262,7 +266,10 @@ class VoltageConfigDialog(QFrame):
             key_grid = QGridLayout()
             key_grid.setVerticalSpacing(0)
             for k, (color, keys) in enumerate(
-                [("blue", [("up", (0, 1)), ("down", (1, 1))]), ("darkGreen", [("left", (1, 0)), ("right", (1, 2))])]
+                [
+                    ("blue", [("up", (0, 1)), ("down", (1, 1))]),
+                    ("darkGreen", [("left", (1, 0)), ("right", (1, 2))]),
+                ]
             ):
                 for key, pos in keys:
                     key_label = QLabel(key)
@@ -289,14 +296,18 @@ class VoltageConfigDialog(QFrame):
         self.layout.addLayout(step_hbox)
 
         self.step_textbox = {}
-        for k, (state, color) in enumerate([("up_down", "blue"), ("left_right", "darkGreen")]):
+        for k, (state, color) in enumerate(
+            [("up_down", "blue"), ("left_right", "darkGreen")]
+        ):
             # step_hbox.addStretch(0)
             self.step_textbox[state] = QLineEdit(str(self.step[state]))
             self.step_textbox[state].setMaximumWidth(85)
             self.step_textbox[state].setMinimumWidth(55)
             self.step_textbox[state].setAlignment(Qt.AlignRight)
             step_hbox.addWidget(self.step_textbox[state])
-            self.step_textbox[state].returnPressed.connect(lambda: self.set_step(state, self.step_textbox.text()))
+            self.step_textbox[state].returnPressed.connect(
+                lambda: self.set_step(state, self.step_textbox[state].text())
+            )
             step_unit_label = QLabel("V")
             if k == 0:
                 step_unit_label.setContentsMargins(0, 0, 20, 0)
