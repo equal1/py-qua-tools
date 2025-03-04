@@ -81,14 +81,14 @@ def xarray_to_plotly(da: xr.DataArray):
         fig = px.line(
             x=x_coord.values,
             y=da.values.flatten(),
-            labels={y_label: yaxis_label, "value": zaxis_label},
         )
+        fig.update_layout(xaxis_title=xaxis_label, yaxis_title=zaxis_label)
     elif da.values.shape[1] == 1:
         fig = px.line(
             x=y_coord.values,
             y=da.values.flatten(),
-            labels={x_label: xaxis_label, "value": zaxis_label},
         )
+        fig.update_layout(xaxis_title=yaxis_label, yaxis_title=zaxis_label)
     else:
         fig = go.Figure(
             go.Heatmap(
@@ -100,7 +100,7 @@ def xarray_to_plotly(da: xr.DataArray):
             )
         )
 
-    fig.update_layout(xaxis_title=xaxis_label, yaxis_title=yaxis_label)
+        fig.update_layout(xaxis_title=xaxis_label, yaxis_title=yaxis_label)
     return fig
 
 

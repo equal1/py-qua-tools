@@ -306,7 +306,9 @@ class VoltageConfigDialog(QFrame):
             self.step_textbox[state].setAlignment(Qt.AlignRight)
             step_hbox.addWidget(self.step_textbox[state])
             self.step_textbox[state].returnPressed.connect(
-                lambda: self.set_step(state, self.step_textbox[state].text())
+                lambda state=state: self.set_step(
+                    state, self.step_textbox[state].text()
+                )
             )
             step_unit_label = QLabel("V")
             if k == 0:
